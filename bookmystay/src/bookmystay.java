@@ -1,136 +1,87 @@
-import java.util.Scanner;
+import java.util.*;
 
 // ===============================
-// Room Class (Domain Model)
+// Reservation Class
 // ===============================
-class Room {
-    private int beds;
-    private int size;
-    private double price;
+class Reservation {
+    private String guestName;
+    private String roomType;
 
-    public Room(int beds, int size, double price) {
-        this.beds = beds;
-        this.size = size;
-        this.price = price;
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
 
-    public int getBeds() {
-        return beds;
+    public String getGuestName() {
+        return guestName;
     }
 
-    public int getSize() {
-        return size;
+    public String getRoomType() {
+        return roomType;
     }
 
-    public double getPrice() {
-        return price;
+    public void display() {
+        System.out.println("Guest: " + guestName + " | Room Type: " + roomType);
     }
 }
 
 // ===============================
-// RoomInventory (State Holder)
+// Booking Queue
 // ===============================
-class RoomInventory {
-    private int singleRooms;
-    private int doubleRooms;
-    private int suiteRooms;
+class BookingRequestQueue {
+    private Queue<Reservation> queue;
 
-    public RoomInventory(int single, int doub, int suite) {
-        this.singleRooms = single;
-        this.doubleRooms = doub;
-        this.suiteRooms = suite;
+    public BookingRequestQueue() {
+        queue = new LinkedList<>();
     }
 
-    public int getAvailableRooms(String type) {
-        if (type.equalsIgnoreCase("Single")) {
-            return singleRooms;
-        } else if (type.equalsIgnoreCase("Double")) {
-            return doubleRooms;
-        } else if (type.equalsIgnoreCase("Suite")) {
-            return suiteRooms;
-        }
-        return 0;
+    // Enqueue
+    public void addRequest(Reservation r) {
+        queue.offer(r);
+        System.out.println("Booking request added for " + r.getGuestName());
     }
-}
 
-// ===============================
-// RoomSearchService
-// ===============================
-class RoomSearchService {
-
-    public void searchAvailableRooms(
-            RoomInventory inventory,
-            Room singleRoom,
-            Room doubleRoom,
-            Room suiteRoom) {
-
-        System.out.println("\n===== Room Search Result =====\n");
-
-        int singleAvailable = inventory.getAvailableRooms("Single");
-        if (singleAvailable > 0) {
-            System.out.println("Single Room:");
-            System.out.println("Beds: " + singleRoom.getBeds());
-            System.out.println("Size: " + singleRoom.getSize() + " sqft");
-            System.out.println("Price per night: " + singleRoom.getPrice());
-            System.out.println("Available: " + singleAvailable);
-            System.out.println();
+    // Display FIFO order
+    public void showRequests() {
+        if (queue.isEmpty()) {
+            System.out.println("No booking requests.");
+            return;
         }
 
-        int doubleAvailable = inventory.getAvailableRooms("Double");
-        if (doubleAvailable > 0) {
-            System.out.println("Double Room:");
-            System.out.println("Beds: " + doubleRoom.getBeds());
-            System.out.println("Size: " + doubleRoom.getSize() + " sqft");
-            System.out.println("Price per night: " + doubleRoom.getPrice());
-            System.out.println("Available: " + doubleAvailable);
-            System.out.println();
-        }
-
-        int suiteAvailable = inventory.getAvailableRooms("Suite");
-        if (suiteAvailable > 0) {
-            System.out.println("Suite Room:");
-            System.out.println("Beds: " + suiteRoom.getBeds());
-            System.out.println("Size: " + suiteRoom.getSize() + " sqft");
-            System.out.println("Price per night: " + suiteRoom.getPrice());
-            System.out.println("Available: " + suiteAvailable);
-            System.out.println();
+        System.out.println("\nBooking Requests (FIFO Order):");
+        for (Reservation r : queue) {
+            r.display();
         }
     }
 }
 
 // ===============================
-// Main Class
+// Main Class (lowercase as requested)
 // ===============================
 public class bookmystay {
     public static void main(String[] args) {
 
         Scanner sc = new Scanner(System.in);
+        BookingRequestQueue queue = new BookingRequestQueue();
 
-        // ===== INPUT: Inventory =====
-        System.out.println("Enter available Single Rooms:");
-        int singleCount = sc.nextInt();
+        System.out.print("Enter number of booking requests: ");
+        int n = sc.nextInt();
+        sc.nextLine(); // consume newline
 
-        System.out.println("Enter available Double Rooms:");
-        int doubleCount = sc.nextInt();
+        for (int i = 1; i <= n; i++) {
+            System.out.println("\nEnter details for request " + i);
 
-        System.out.println("Enter available Suite Rooms:");
-        int suiteCount = sc.nextInt();
+            System.out.print("Guest Name: ");
+            String name = sc.nextLine();
 
-        RoomInventory inventory = new RoomInventory(singleCount, doubleCount, suiteCount);
+            System.out.print("Room Type (Single/Double/Suite): ");
+            String type = sc.nextLine();
 
-        // ===== INPUT: Room Details =====
-        System.out.println("\nEnter Single Room details (beds, size, price):");
-        Room singleRoom = new Room(sc.nextInt(), sc.nextInt(), sc.nextDouble());
+            Reservation r = new Reservation(name, type);
+            queue.addRequest(r);
+        }
 
-        System.out.println("\nEnter Double Room details (beds, size, price):");
-        Room doubleRoom = new Room(sc.nextInt(), sc.nextInt(), sc.nextDouble());
-
-        System.out.println("\nEnter Suite Room details (beds, size, price):");
-        Room suiteRoom = new Room(sc.nextInt(), sc.nextInt(), sc.nextDouble());
-
-        // ===== Search =====
-        RoomSearchService service = new RoomSearchService();
-        service.searchAvailableRooms(inventory, singleRoom, doubleRoom, suiteRoom);
+        queue.showRequests();
 
         sc.close();
     }
